@@ -1,0 +1,8 @@
+torch 
+numpy
+h5py
+pandas
+matplotlib
+jupyter 
+torch-summary
+pyarrow

@@ -1,0 +1,5 @@
+# All these types of files
+*.pyc
+
+# Must Download Large Datasets Manually (Can't be Stored on Github)
+/datasets
