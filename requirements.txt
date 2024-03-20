@@ -6,3 +6,5 @@ matplotlib
 jupyter 
 torch-summary
 pyarrow
+matlabengine
+mat73
