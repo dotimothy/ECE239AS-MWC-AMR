@@ -89,7 +89,7 @@ def loadHisar(hisar2019Dir):
     return X_train_val,X_test,Y_train_val,Y_test,Z_train_val,Z_test, SNRs, modClasses
 
 # Prepare RadioML Datset for Training
-def prepareDatasetRadioML(X,Y,Z,split=[0.9,0.05,0.05],batch_size=9000):
+def prepareDatasetRadioML(X,Y,Z,split=[0.9,0.05,0.05],batch_size=9000,augment=False):
     N = X.shape[0]
     indexes = np.arange(N)
     np.random.seed(0) # Make sure it's repeatable
@@ -108,6 +108,9 @@ def prepareDatasetRadioML(X,Y,Z,split=[0.9,0.05,0.05],batch_size=9000):
     Y_val = torch.tensor(Y[val_indexes],dtype=torch.float32)
     Y_test = torch.tensor(Y[test_indexes],dtype=torch.float32)
 
+    if(augment): # Augment by Temporal Reversal (Training Only)
+        X_train, Y_train = augmentData(X_train,Y_train)
+
     Z_test = Z[test_indexes]
     
     train_data = torch.utils.data.TensorDataset(X_train,Y_train)
@@ -122,7 +125,7 @@ def prepareDatasetRadioML(X,Y,Z,split=[0.9,0.05,0.05],batch_size=9000):
     return train_data,val_data,test_data,train_loader,val_loader,test_loader,Z_test
 
 # Prepare Hisar Datset for Training, Assume Data is already split between Test and Train.
-def prepareDatasetHisar(X_train_val,X_test,Y_train_val,Y_test,split=[0.8,0.2],batch_size=9000):
+def prepareDatasetHisar(X_train_val,X_test,Y_train_val,Y_test,split=[0.8,0.2],batch_size=9000,augment=False):
     N = X_train_val.shape[0]
     indexes = np.arange(N)
     np.random.seed(0) # Make sure it's repeatable
@@ -140,6 +143,9 @@ def prepareDatasetHisar(X_train_val,X_test,Y_train_val,Y_test,split=[0.8,0.2],ba
     Y_train = torch.tensor(Y_train_val[train_indexes],dtype=torch.float32)
     Y_val = torch.tensor(Y_train_val[val_indexes],dtype=torch.float32)
     Y_test = torch.tensor(Y_test,dtype=torch.float32)
+
+    if(augment): # Augment by Temporal Reversal (Training Only)
+        X_train, Y_train = augmentData(X_train,Y_train)
     
     train_data = torch.utils.data.TensorDataset(X_train,Y_train)
     val_data = torch.utils.data.TensorDataset(X_val,Y_val)
@@ -151,3 +157,11 @@ def prepareDatasetHisar(X_train_val,X_test,Y_train_val,Y_test,split=[0.8,0.2],ba
     test_loader = torch.utils.data.DataLoader(test_data,shuffle=False,batch_size=batch_size)
 
     return train_data,val_data,test_data,train_loader,val_loader,test_loader
+
+# Augments the Training Data by applying a temporal reversal on the data and then appending it to the original data
+def augmentData(X_train,Y_train):
+    X_train_flip = torch.flip(X_train,dims=(-1,))
+    Y_train_flip = torch.flip(Y_train,dims=(-1,))
+    X_train_aug = torch.vstack([X_train,X_train_flip])
+    Y_train_aug = torch.vstack([Y_train,Y_train]) # Flipped Data has the Same Labels as Regular Data
+    return X_train_aug, Y_train_aug
