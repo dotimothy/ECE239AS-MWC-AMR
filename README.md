@@ -2,6 +2,7 @@
 
 This project explores the application of Convolutional Neural Networks and their applications for Automatic Modulation Recognition on the RadioML and HisarMod Datasets.
 
+<base target="_blank">
 Authors: [Timothy Do](https://timothydo.me)
 
 ## Dependencies
